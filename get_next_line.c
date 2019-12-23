@@ -6,7 +6,7 @@
 /*   By: gbudau <gbudau@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/23 17:15:15 by gbudau            #+#    #+#             */
-/*   Updated: 2019/12/23 22:40:59 by gbudau           ###   ########.fr       */
+/*   Updated: 2019/12/24 00:28:42 by gbudau           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,30 +48,37 @@ static char	*ft_checkrest(char **rest, char **line)
 	return (next);
 }
 
-int			get_next_line(int fd, char **line)
+char		*ft_checkbuff(char *next, char **rest, char *buff)
 {
-	static	char	*rest;
-	char			buffer[BUFFER_SIZE + 1];
-	ssize_t			bytesread;
-	char			*next;
+	char	*tmp;
+
+	tmp = NULL;
+	if ((next = ft_strchr(buff, '\n')))
+	{
+		*next++ = '\0';
+		tmp = *rest;
+		*rest = ft_strdup(next);
+		free(tmp);
+		tmp = NULL;
+	}
+	return (next);
+}
+
+int			ft_readbuff(int fd, char **line, char **rest, char *next)
+{
+	char			buff[BUFFER_SIZE + 1];
+	ssize_t			br;
 	char			*tmp;
 
-	if (fd < 0 || !line || BUFFER_SIZE <= 0 || read(fd, buffer, 0))
-		return (-1);
-	next = ft_checkrest(&rest, line);
-	while (next == NULL && (bytesread = read(fd, buffer, BUFFER_SIZE)))
+	tmp = NULL;
+	while (next == NULL && (br = read(fd, buff, BUFFER_SIZE)))
 	{
-		buffer[bytesread] = '\0';
-		if ((next = ft_strchr(buffer, '\n')))
-		{
-			*next++ = '\0';
-			tmp = rest;
-			rest = ft_strdup(next);
-			free(tmp);
-		}
+		buff[br] = '\0';
+		next = ft_checkbuff(next, rest, &buff[0]);
 		tmp = *line;
-		if (!(*line = ft_strjoin(*line, buffer)) || bytesread < 0)
+		if (br < 0 || !(*line = ft_strjoin(*line, buff)))
 		{
+			ft_freeptr(rest);
 			ft_freeptr(&tmp);
 			return (-1);
 		}
@@ -79,8 +86,20 @@ int			get_next_line(int fd, char **line)
 	}
 	if (next == NULL)
 	{
-		ft_freeptr(&rest);
+		ft_freeptr(rest);
 		return (0);
 	}
-	return (ft_strlen(*line) || rest ? 1 : 0);
+	return (ft_strlen(*line) || *rest ? 1 : 0);
+}
+
+int			get_next_line(int fd, char **line)
+{
+	static	char	*rest;
+	char			*next;
+
+	next = NULL;
+	if (fd < 0 || !line || read(fd, next, 0))
+		return (-1);
+	next = ft_checkrest(&rest, line);
+	return (ft_readbuff(fd, line, &rest, next));
 }
