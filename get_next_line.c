@@ -6,26 +6,11 @@
 /*   By: gbudau <gbudau@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/23 17:15:15 by gbudau            #+#    #+#             */
-/*   Updated: 2019/12/23 19:54:24 by gbudau           ###   ########.fr       */
+/*   Updated: 2019/12/23 22:40:59 by gbudau           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-static char	*ft_strnew(size_t size)
-{
-	char	*ret;
-	char	*tmp;
-	size_t	len;
-
-	len = size + 1;
-	if (!(ret = malloc(len)))
-		return (NULL);
-	tmp = ret;
-	while (len--)
-		*tmp++ = '\0';
-	return (ret);
-}
 
 static void	ft_freeptr(char **ptr)
 {
@@ -59,7 +44,7 @@ static char	*ft_checkrest(char **rest, char **line)
 		}
 	}
 	else
-		*line = ft_strnew(0);
+		*line = ft_strdup("");
 	return (next);
 }
 
