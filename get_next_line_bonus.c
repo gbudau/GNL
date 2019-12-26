@@ -15,67 +15,67 @@
 
 static char	*ft_checkrest(char **rest, char **line, char *next)
 {
-		size_t	i;
-		char	*tmp;
+	size_t	i;
+	char	*tmp;
 
-		i = 0;
-		if (*rest != 0)
-		{
-			tmp = *rest;
-			if ((next = ft_strchr(*rest, '\n')))
-			{
-				*next++ = '\0';
-				*line = ft_strdup(*rest);
-				tmp[i] = next[i];
-				while (next[++i])
-					tmp[i] = next[i];
-				tmp[i] = '\0';
-			}
-			else
-				*line = ft_strdup(*rest);
-		}
-		else
-			*line = ft_strdup("");
-		return (next);
-	}
-
-	static char		*ft_checkbuff(char *next, char **rest, char *buff)
+	i = 0;
+	if (*rest != 0)
 	{
-		char	*tmp;
-
-		tmp = NULL;
-		if ((next = ft_strchr(buff, '\n')))
+		tmp = *rest;
+		if ((next = ft_strchr(*rest, '\n')))
 		{
 			*next++ = '\0';
-			tmp = *rest;
-			*rest = ft_strdup(next);
-			free(tmp);
-			tmp = NULL;
+			*line = ft_strdup(*rest);
+			tmp[i] = next[i];
+			while (next[++i])
+				tmp[i] = next[i];
+			tmp[i] = '\0';
 		}
-		return (next);
+		else
+			*line = ft_strdup(*rest);
 	}
+	else
+		*line = ft_strdup("");
+	return (next);
+}
 
-	static int			ft_readbuff(int fd, char **line, char **rest, char *next)
+static char		*ft_checkbuff(char *next, char **rest, char *buff)
+{
+	char	*tmp;
+
+	tmp = NULL;
+	if ((next = ft_strchr(buff, '\n')))
 	{
-		char			buff[BUFFER_SIZE + 1];
-		ssize_t			br;
-		char			*tmp;
-
+		*next++ = '\0';
+		tmp = *rest;
+		*rest = ft_strdup(next);
+		free(tmp);
 		tmp = NULL;
-		while (next == NULL && (br = read(fd, buff, BUFFER_SIZE)))
+	}
+	return (next);
+}
+
+static int			ft_readbuff(int fd, char **line, char **rest, char *next)
+{
+	char			buff[BUFFER_SIZE + 1];
+	ssize_t			br;
+	char			*tmp;
+
+	tmp = NULL;
+	while (next == NULL && (br = read(fd, buff, BUFFER_SIZE)))
+	{
+		buff[br] = '\0';
+		next = ft_checkbuff(next, rest, &buff[0]);
+		tmp = *line;
+		if (br < 0 || !(*line = ft_strjoin(*line, buff)))
 		{
-			buff[br] = '\0';
-			next = ft_checkbuff(next, rest, &buff[0]);
-			tmp = *line;
-			if (br < 0 || !(*line = ft_strjoin(*line, buff)))
-			{
-				ft_freeptr(rest);
-				ft_freeptr(&tmp);
-				return (-1);
-			}
+			ft_freeptr(rest);
 			ft_freeptr(&tmp);
+			return (-1);
 		}
-		if (next == NULL)
+		ft_freeptr(&tmp);
+	}
+	if (next == NULL)
 	{
 		ft_freeptr(rest);
 		return (0);
@@ -83,7 +83,7 @@ static char	*ft_checkrest(char **rest, char **line, char *next)
 	return (1);
 }
 
-static t_gnl			*ft_lstnewfd(int fd)
+static t_gnl		*ft_lstnewfd(int fd)
 {
 	t_gnl	*new;
 
@@ -101,24 +101,26 @@ int			get_next_line(int fd, char **line)
 	static t_gnl		*head;
 	t_gnl			*tmp;
 	char			*next;
-
+	int			ret;
 
 	next = NULL;
 	if (fd < 0 || !line || read(fd, next, 0))
 		return (-1);
+	(head == NULL) ? head = ft_lstnewfd(fd) : head;
+	if (head == NULL)
+		return (-1);
 	tmp = head;
-	while (tmp != NULL)
+	while (tmp->fd != fd)
 	{
-		if (tmp->fd == fd)
-			break;
+		if (tmp->next == NULL)
+			tmp->next = ft_lstnewfd(fd);
 		tmp = tmp->next;
 	}
 	if (tmp == NULL)
-	{
-		tmp = ft_lstnewfd(fd);
-		tmp->next = head;
-		head = tmp;
-	}
+		return (-1);
 	next = ft_checkrest(&tmp->rest, line, next);
-	return (ft_readbuff(tmp->fd, line, &tmp->rest, next));
+	ret = ft_readbuff(tmp->fd, line, &tmp->rest, next);
+	if (ret == 0)
+		ft_lstfreenode(tmp->fd, &head);
+	return (ret);
 }

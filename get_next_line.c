@@ -89,7 +89,7 @@ int			ft_readbuff(int fd, char **line, char **rest, char *next)
 		ft_freeptr(rest);
 		return (0);
 	}
-	return (ft_strlen(*line) || *rest ? 1 : 0);
+	return (1);
 }
 
 int			get_next_line(int fd, char **line)

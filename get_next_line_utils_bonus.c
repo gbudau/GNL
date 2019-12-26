@@ -19,29 +19,22 @@ void	ft_freeptr(char **ptr)
 	*ptr = NULL;
 }
 
-
-size_t	ft_strlen(const char *str)
+void	ft_lstfreenode(int fd, t_gnl **head)
 {
-	size_t i;
+	t_gnl	*del;
+	t_gnl	**p;
 
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-void	*ft_memcpy(void *dst, const void *src, size_t n)
-{
-	char		*d;
-	const char	*s;
-
-	d = dst;
-	s = src;
-	if (dst == src)
-		return (dst);
-	while (n--)
-		*d++ = *s++;
-	return (dst);
+	p = head;
+	while (*p && (*p)->fd != fd)
+		p = &(*p)->next;
+	if (p)
+	{
+		del = *p;
+		*p = del->next;
+		del->next = NULL;
+		free(del);
+		del = NULL;
+	}
 }
 
 char	*ft_strdup(const char *s1)
@@ -49,10 +42,13 @@ char	*ft_strdup(const char *s1)
 	char	*ret;
 	size_t	len;
 
-	len = ft_strlen(s1);
-	if (!(ret = malloc(len + 1)))
+	len = 0;
+	while (s1[len] != 0)
+		len++;
+	if (!(ret = malloc(++len)))
 		return (NULL);
-	ft_memcpy(ret, s1, len + 1);
+	while (len--)
+		ret[len] = s1[len];
 	return (ret);
 }
 
@@ -78,9 +74,8 @@ char	*ft_strchr(const char *s, int c)
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	char	*ret;
-	size_t	len;
-	size_t	s1len;
-	size_t	s2len;
+	size_t	i;
+	size_t	j;
 
 	if (s1 == NULL && s2 == NULL)
 		return (NULL);
@@ -88,12 +83,18 @@ char	*ft_strjoin(char const *s1, char const *s2)
 		return (ft_strdup(s1));
 	else if (s1 == NULL)
 		return (ft_strdup(s2));
-	s1len = ft_strlen(s1);
-	s2len = ft_strlen(s2);
-	len = s1len + s2len + 1;
-	if (!(ret = malloc(len)))
+	i = 0;
+	while (s1[i] != '\0')
+		i++;
+	j = 0;
+	while (s2[j] != '\0')
+		j++;
+	if (!(ret = malloc(i + j + 1)))
 		return (NULL);
-	ft_memcpy(ret, s1, s1len);
-	ft_memcpy(ret + s1len, s2, s2len + 1);
+	ret[i + j] = '\0';
+	while (j-- != 0)
+		ret[i + j] = s2[j];
+	while (i-- != 0)
+		ret[i] = s1[i];
 	return (ret);
 }
