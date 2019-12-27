@@ -120,7 +120,7 @@ int			get_next_line(int fd, char **line)
 		return (-1);
 	next = ft_checkrest(&tmp->rest, line, next);
 	ret = ft_readbuff(tmp->fd, line, &tmp->rest, next);
-	if (ret == 0)
+	if (ret <= 0)
 		ft_lstfreenode(tmp->fd, &head);
 	return (ret);
 }
