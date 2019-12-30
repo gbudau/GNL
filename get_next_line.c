@@ -22,8 +22,6 @@ static void	ft_freeptr(char **ptr)
 static char	*ft_checkrest(char **rest, char **line)
 {
 	char	*next;
-	char	*tmp;
-	size_t	len;
 
 	next = NULL;
 	if (*rest != 0)
@@ -35,13 +33,7 @@ static char	*ft_checkrest(char **rest, char **line)
 			ft_memcpy(*rest, next, ft_strlen(next) + 1);
 		}
 		else
-		{
 			*line = ft_strdup(*rest);
-			len = ft_strlen(*rest);
-			tmp = *rest;
-			while (len--)
-				*tmp++ = '\0';
-		}
 	}
 	else
 		*line = ft_strdup("");
