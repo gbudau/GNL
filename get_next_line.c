@@ -70,11 +70,11 @@ int			ft_readbuff(int fd, char **line, char **rest, char *next)
 	ssize_t			br;
 	char			*tmp;
 
-	tmp = NULL;
+	next = ft_checkrest(rest, line);
 	while (next == NULL && (br = read(fd, buff, BUFFER_SIZE)))
 	{
 		buff[br] = '\0';
-		next = ft_checkbuff(next, rest, &buff[0]);
+		next = ft_checkbuff(next, rest, buff);
 		tmp = *line;
 		if (br < 0 || !(*line = ft_strjoin(*line, buff)))
 		{
@@ -100,6 +100,5 @@ int			get_next_line(int fd, char **line)
 	next = NULL;
 	if (fd < 0 || !line || read(fd, next, 0))
 		return (-1);
-	next = ft_checkrest(&rest, line);
 	return (ft_readbuff(fd, line, &rest, next));
 }
