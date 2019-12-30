@@ -44,14 +44,12 @@ char		*ft_checkbuff(char *next, char **rest, char *buff)
 {
 	char	*tmp;
 
-	tmp = NULL;
 	if ((next = ft_strchr(buff, '\n')))
 	{
 		*next++ = '\0';
 		tmp = *rest;
 		*rest = ft_strdup(next);
-		free(tmp);
-		tmp = NULL;
+		ft_freeptr(&tmp);
 	}
 	return (next);
 }

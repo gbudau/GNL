@@ -77,12 +77,8 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	size_t	i;
 	size_t	j;
 
-	if (s1 == NULL && s2 == NULL)
+	if (s1 == NULL || s2 == NULL)
 		return (NULL);
-	if (s2 == NULL)
-		return (ft_strdup(s1));
-	else if (s1 == NULL)
-		return (ft_strdup(s2));
 	i = 0;
 	while (s1[i] != '\0')
 		i++;

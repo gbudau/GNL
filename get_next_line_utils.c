@@ -70,22 +70,23 @@ char	*ft_strchr(const char *s, int c)
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	char	*ret;
-	size_t	len;
-	size_t	s1len;
-	size_t	s2len;
+	size_t	i;
+	size_t	j;
 
-	if (s1 == NULL && s2 == NULL)
+	if (s1 == NULL || s2 == NULL)
 		return (NULL);
-	if (s2 == NULL)
-		return (ft_strdup(s1));
-	else if (s1 == NULL)
-		return (ft_strdup(s2));
-	s1len = ft_strlen(s1);
-	s2len = ft_strlen(s2);
-	len = s1len + s2len + 1;
-	if (!(ret = malloc(len)))
+	i = 0;
+	while (s1[i] != '\0')
+		i++;
+	j = 0;
+	while (s2[j] != '\0')
+		j++;
+	if (!(ret = malloc(i + j + 1)))
 		return (NULL);
-	ft_memcpy(ret, s1, s1len);
-	ft_memcpy(ret + s1len, s2, s2len + 1);
+	ret[i + j] = '\0';
+	while (j-- != 0)
+		ret[i + j] = s2[j];
+	while (i-- != 0)
+		ret[i] = s1[i];
 	return (ret);
 }
