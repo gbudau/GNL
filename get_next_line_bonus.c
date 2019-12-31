@@ -16,20 +16,18 @@
 static char	*ft_checkrest(char **rest, char **line, char *next)
 {
 	size_t	i;
-	char	*tmp;
 
 	i = 0;
 	if (*rest != 0)
 	{
-		tmp = *rest;
 		if ((next = ft_strchr(*rest, '\n')))
 		{
 			*next++ = '\0';
 			*line = ft_strdup(*rest);
-			tmp[i] = next[i];
+			(*rest)[i] = next[i];
 			while (next[++i])
-				tmp[i] = next[i];
-			tmp[i] = '\0';
+				(*rest)[i] = next[i];
+			(*rest)[i] = '\0';
 		}
 		else
 			*line = ft_strdup(*rest);
@@ -43,14 +41,12 @@ static char		*ft_checkbuff(char *next, char **rest, char *buff)
 {
 	char	*tmp;
 
-	tmp = NULL;
 	if ((next = ft_strchr(buff, '\n')))
 	{
 		*next++ = '\0';
 		tmp = *rest;
 		*rest = ft_strdup(next);
-		free(tmp);
-		tmp = NULL;
+		ft_freeptr(&tmp);
 	}
 	return (next);
 }

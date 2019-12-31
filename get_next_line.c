@@ -12,25 +12,21 @@
 
 #include "get_next_line.h"
 
-static char	*ft_checkrest(char **rest, char **line)
+static char	*ft_checkrest(char **rest, char **line, char *next)
 {
 	size_t	i;
-	char	*tmp;
-	char	*next;
 
 	i = 0;
-	next = NULL;
 	if (*rest != 0)
 	{
-		tmp = *rest;
 		if ((next = ft_strchr(*rest, '\n')))
 		{
 			*next++ = '\0';
 			*line = ft_strdup(*rest);
-			tmp[i] = next[i];
+			(*rest)[i] = next[i];
 			while (next[++i])
-				tmp[i] = next[i];
-			tmp[i] = '\0';
+				(*rest)[i] = next[i];
+			(*rest)[i] = '\0';
 		}
 		else
 			*line = ft_strdup(*rest);
@@ -57,16 +53,16 @@ char		*ft_checkbuff(char *next, char **rest, char *buff)
 int			ft_readbuff(int fd, char **line, char **rest, char *next)
 {
 	char			buff[BUFFER_SIZE + 1];
-	ssize_t			br;
+	ssize_t			error;
 	char			*tmp;
 
-	next = ft_checkrest(rest, line);
-	while (next == NULL && (br = read(fd, buff, BUFFER_SIZE)))
+	next = ft_checkrest(rest, line, next);
+	while (next == NULL && (error = read(fd, buff, BUFFER_SIZE)))
 	{
-		buff[br] = '\0';
+		buff[error] = '\0';
 		next = ft_checkbuff(next, rest, buff);
 		tmp = *line;
-		if (br < 0 || !(*line = ft_strjoin(*line, buff)))
+		if (error < 0 || !(*line = ft_strjoin(*line, buff)))
 		{
 			ft_freeptr(rest);
 			ft_freeptr(&tmp);
