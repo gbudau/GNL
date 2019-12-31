@@ -12,28 +12,11 @@
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *str)
+void	ft_freeptr(char **ptr)
 {
-	size_t i;
-
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-void	*ft_memcpy(void *dst, const void *src, size_t n)
-{
-	char		*d;
-	const char	*s;
-
-	d = dst;
-	s = src;
-	if (dst == src)
-		return (dst);
-	while (n--)
-		*d++ = *s++;
-	return (dst);
+	if (*ptr != NULL)
+		free(*ptr);
+	*ptr = NULL;
 }
 
 char	*ft_strdup(const char *s1)
@@ -41,28 +24,28 @@ char	*ft_strdup(const char *s1)
 	char	*ret;
 	size_t	len;
 
-	len = ft_strlen(s1);
-	if (!(ret = malloc(len + 1)))
+	len = 0;
+	while (s1[len] != 0)
+		len++;
+	if ((ret = malloc(++len)) == NULL)
 		return (NULL);
-	ft_memcpy(ret, s1, len + 1);
+	while (len--)
+		ret[len] = s1[len];
 	return (ret);
 }
 
 char	*ft_strchr(const char *s, int c)
 {
-	const char		*p;
+	char	ch;
 
-	p = s;
-	if (p)
+	ch = c;
+	while (s)
 	{
-		while (*p)
-		{
-			if (*p == (const char)c)
-				return ((char *)p);
-			p++;
-		}
-		if (*p == (const char)c)
-			return ((char *)p);
+		if (*s == ch)
+			return ((char *)s);
+		if (*s == '\0')
+			return (NULL);
+		s++;
 	}
 	return (NULL);
 }

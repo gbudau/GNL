@@ -12,25 +12,25 @@
 
 #include "get_next_line.h"
 
-static void	ft_freeptr(char **ptr)
-{
-	if (*ptr != NULL)
-		free(*ptr);
-	*ptr = NULL;
-}
-
 static char	*ft_checkrest(char **rest, char **line)
 {
+	size_t	i;
+	char	*tmp;
 	char	*next;
 
+	i = 0;
 	next = NULL;
 	if (*rest != 0)
 	{
+		tmp = *rest;
 		if ((next = ft_strchr(*rest, '\n')))
 		{
 			*next++ = '\0';
 			*line = ft_strdup(*rest);
-			ft_memcpy(*rest, next, ft_strlen(next) + 1);
+			tmp[i] = next[i];
+			while (next[++i])
+				tmp[i] = next[i];
+			tmp[i] = '\0';
 		}
 		else
 			*line = ft_strdup(*rest);
