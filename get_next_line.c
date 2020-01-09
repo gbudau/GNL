@@ -12,13 +12,13 @@
 
 #include "get_next_line.h"
 
-static char	*ft_checksave(char **save, char **line, ssize_t *e)
+static char	*ft_checksave(char **save, char **line, ssize_t *error)
 {
 	char	*next;
 	ssize_t	i;
 
 	i = -1;
-	*e = 1;
+	*error = 1;
 	next = NULL;
 	if (*save != 0)
 	{
@@ -36,40 +36,39 @@ static char	*ft_checksave(char **save, char **line, ssize_t *e)
 	else
 		*line = ft_strdup("");
 	if (*line == NULL)
-		*e = -1;
+		*error = -1;
 	return (next);
 }
 
-char		*ft_checkbuff(char *next, char **save, char *buff, ssize_t *e)
+char		*ft_checkbuff(char *next, char **save, char *buff, ssize_t *err)
 {
 	char	*tmp;
 
-	*e = 1;
 	if ((next = ft_strchr(buff, '\n')))
 	{
 		*next++ = '\0';
 		tmp = *save;
 		*save = ft_strdup(next);
 		if (*save == NULL)
-			*e = -1;
+			*err = -1;
 		ft_freeptr(&tmp);
 	}
 	return (next);
 }
 
-int		ft_readbuff(int fd, char **line, char **save, ssize_t *e)
+int		ft_readbuff(int fd, char **line, char **save, ssize_t *err)
 {
 	char			buff[BUFFER_SIZE + 1];
 	char			*next;
 	char			*tmp;
 
-	next = ft_checksave(save, line, e);
-	while (*e > 0 && next == NULL && (*e = read(fd, buff, BUFFER_SIZE)) > 0)
+	next = ft_checksave(save, line, err);
+	while (*err > 0 && !next && (*err = read(fd, buff, BUFFER_SIZE)) > 0)
 	{
-		buff[*e] = '\0';
-		next = ft_checkbuff(next, save, buff, e);
+		buff[*err] = '\0';
+		next = ft_checkbuff(next, save, buff, err);
 		tmp = *line;
-		if (*e < 0 || !(*line = ft_strjoin(*line, buff)))
+		if (*err < 0 || !(*line = ft_strjoin(*line, buff)))
 		{
 			ft_freeptr(save);
 			ft_freeptr(&tmp);
@@ -77,11 +76,11 @@ int		ft_readbuff(int fd, char **line, char **save, ssize_t *e)
 		}
 		ft_freeptr(&tmp);
 	}
-	if (next == NULL || *e <= 0)
+	if (next == NULL || *err < 0)
 	{
 		ft_freeptr(save);
-		(*e < 0) ? ft_freeptr(line) : *e;
-		return ((*e < 0) ? -1 : 0);
+		(*err < 0) ? ft_freeptr(line) : *err;
+		return ((*err < 0) ? -1 : 0);
 	}
 	return (1);
 }
@@ -90,10 +89,10 @@ int		get_next_line(int fd, char **line)
 {
 	static	char	*save;
 	char		*test;
-	ssize_t		e;
+	ssize_t		error;
 
 	test = NULL;
 	if (fd < 0 || !line || read(fd, test, 0))
 		return (-1);
-	return (ft_readbuff(fd, line, &save, &e));
+	return (ft_readbuff(fd, line, &save, &error));
 }
