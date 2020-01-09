@@ -12,87 +12,88 @@
 
 #include "get_next_line.h"
 
-static char	*ft_checkrest(char **rest, char **line, ssize_t *re)
+static char	*ft_checksave(char **save, char **line, ssize_t *e)
 {
 	char	*next;
 	ssize_t	i;
 
 	i = -1;
-	*re = 1;
+	*e = 1;
 	next = NULL;
-	if (*rest != 0)
+	if (*save != 0)
 	{
-		if ((next = ft_strchr(*rest, '\n')))
+		if ((next = ft_strchr(*save, '\n')))
 		{
 			*next++ = '\0';
-			*line = ft_strdup(*rest);
+			*line = ft_strdup(*save);
 			while (next[++i])
-				(*rest)[i] = next[i];
-			(*rest)[i] = '\0';
+				(*save)[i] = next[i];
+			(*save)[i] = '\0';
 		}
 		else
-			*line = ft_strdup(*rest);
+			*line = ft_strdup(*save);
 	}
 	else
 		*line = ft_strdup("");
 	if (*line == NULL)
-		*re = -1;
+		*e = -1;
 	return (next);
 }
 
-char		*ft_checkbuff(char *next, char **rest, char *buff, ssize_t *re)
+char		*ft_checkbuff(char *next, char **save, char *buff, ssize_t *e)
 {
 	char	*tmp;
 
-	*re = 1;
+	*e = 1;
 	if ((next = ft_strchr(buff, '\n')))
 	{
 		*next++ = '\0';
-		tmp = *rest;
-		*rest = ft_strdup(next);
-		if (*rest == NULL)
-			*re = -1;
+		tmp = *save;
+		*save = ft_strdup(next);
+		if (*save == NULL)
+			*e = -1;
 		ft_freeptr(&tmp);
 	}
 	return (next);
 }
 
-int			ft_readbuff(int fd, char **line, char **rest)
+int		ft_readbuff(int fd, char **line, char **save, ssize_t *e)
 {
 	char			buff[BUFFER_SIZE + 1];
 	char			*next;
-	ssize_t			re;
 	char			*tmp;
 
-	next = ft_checkrest(rest, line, &re);
-	while (re > 0 && next == NULL && (re = read(fd, buff, BUFFER_SIZE)) > 0)
+	next = ft_checksave(save, line, e);
+	while (*e > 0 && next == NULL && (*e = read(fd, buff, BUFFER_SIZE)) > 0)
 	{
-		buff[re] = '\0';
-		next = ft_checkbuff(next, rest, buff, &re);
+		buff[*e] = '\0';
+		next = ft_checkbuff(next, save, buff, e);
 		tmp = *line;
-		if (re < 0 || !(*line = ft_strjoin(*line, buff)))
+		if (*e < 0 || !(*line = ft_strjoin(*line, buff)))
 		{
-			ft_freeptr(rest);
+			ft_freeptr(save);
 			ft_freeptr(&tmp);
 			return (-1);
 		}
 		ft_freeptr(&tmp);
 	}
-	if (next == NULL)
+	if (next == NULL || *e <= 0)
 	{
-		ft_freeptr(rest);
-		return (0);
+		ft_freeptr(save);
+		(*e < 0) ? ft_freeptr(line) : *e;
+		return ((*e < 0) ? -1 : 0);
 	}
-	return ((re < 0) ? -1 : 1);
+	return (1);
 }
 
-int			get_next_line(int fd, char **line)
+int		get_next_line(int fd, char **line)
 {
-	static	char	*rest;
+	static	char	*save;
 	char		*test;
+	ssize_t		e;
 
 	test = NULL;
 	if (fd < 0 || !line || read(fd, test, 0))
 		return (-1);
-	return (ft_readbuff(fd, line, &rest));
+	return (ft_readbuff(fd, line, &save, &e));
 }
