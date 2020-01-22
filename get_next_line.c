@@ -20,7 +20,7 @@ static char	*ft_checksave(char **save, char **line, ssize_t *error)
 	i = -1;
 	*error = 1;
 	next = NULL;
-	if (*save != 0)
+	if (*save != NULL)
 	{
 		if ((next = ft_strchr(*save, '\n')))
 		{
@@ -79,8 +79,8 @@ int		ft_readbuff(int fd, char **line, char **save, ssize_t *err)
 	if (next == NULL || *err < 0)
 	{
 		ft_freeptr(save);
-		(*err < 0) ? ft_freeptr(line) : *err;
-		return ((*err < 0) ? -1 : 0);
+		*err < 0 ? ft_freeptr(line) : *err;
+		return (*err < 0 ? -1 : 0);
 	}
 	return (1);
 }
