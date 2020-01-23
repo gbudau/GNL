@@ -27,13 +27,11 @@ void	ft_lstfreenode(int fd, t_gnl **head)
 	p = head;
 	while (*p && (*p)->fd != fd)
 		p = &(*p)->next;
-	if (p)
+	if (*p)
 	{
 		del = *p;
 		*p = del->next;
-		del->next = NULL;
 		free(del);
-		del = NULL;
 	}
 }
 

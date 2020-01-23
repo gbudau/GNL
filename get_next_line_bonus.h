@@ -23,7 +23,7 @@
 typedef struct	s_gnl
 {
 		int fd;
-		char *rest;
+		char *save;
 		struct s_gnl *next;
 } 		t_gnl;
 

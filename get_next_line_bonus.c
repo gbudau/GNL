@@ -12,81 +12,83 @@
 
 #include "get_next_line_bonus.h"
 
-
-static char	*ft_checkrest(char **rest, char **line, char *next)
+static void	checksave(char **save, char **line, char **next, ssize_t *ret)
 {
-	size_t	i;
+	ssize_t	i;
 
-	i = 0;
-	if (*rest != 0)
+	i = -1;
+	*ret = 0;
+	if (*save != NULL)
 	{
-		if ((next = ft_strchr(*rest, '\n')))
+		if ((*next = ft_strchr(*save, '\n')))
 		{
-			*next++ = '\0';
-			*line = ft_strdup(*rest);
-			(*rest)[i] = next[i];
-			while (next[++i])
-				(*rest)[i] = next[i];
-			(*rest)[i] = '\0';
+			*ret = 1;
+			*(*next)++ = '\0';
+			*line = ft_strdup(*save);
+			while ((*next)[++i])
+				(*save)[i] = (*next)[i];
+			(*save)[i] = '\0';
 		}
 		else
-			*line = ft_strdup(*rest);
+			*line = ft_strdup(*save);
 	}
 	else
 		*line = ft_strdup("");
-	return (next);
+	if (*line == NULL)
+		*ret = -1;
 }
 
-static char		*ft_checkbuff(char *next, char **rest, char *buff)
+static void	checkbuff(char **next, char **save, char *buff, ssize_t *ret)
 {
 	char	*tmp;
 
-	if ((next = ft_strchr(buff, '\n')))
+	if ((*next = ft_strchr(buff, '\n')))
 	{
-		*next++ = '\0';
-		tmp = *rest;
-		*rest = ft_strdup(next);
+		*(*next)++ = '\0';
+		tmp = *save;
+		*save = ft_strdup(*next);
+		if (*save == NULL)
+			*ret = -1;
 		ft_freeptr(&tmp);
 	}
-	return (next);
 }
 
-static int			ft_readbuff(int fd, char **line, char **rest, char *next)
+static void	readbuff(int fd, char **line, char **save, ssize_t *ret)
 {
-	char			buff[BUFFER_SIZE + 1];
-	ssize_t			br;
-	char			*tmp;
+	char	buff[BUFFER_SIZE + 1];
+	char	*next;
+	char	*tmp;
 
-	tmp = NULL;
-	while (next == NULL && (br = read(fd, buff, BUFFER_SIZE)))
+	next = NULL;
+	checksave(save, line, &next, ret);
+	while (*ret >= 0 && !next && (*ret = read(fd, buff, BUFFER_SIZE)) > 0)
 	{
-		buff[br] = '\0';
-		next = ft_checkbuff(next, rest, &buff[0]);
+		buff[*ret] = '\0';
+		checkbuff(&next, save, buff, ret);
 		tmp = *line;
-		if (br < 0 || !(*line = ft_strjoin(*line, buff)))
+		if (*ret > 0 && !(*line = ft_strjoin(*line, buff)))
 		{
-			ft_freeptr(rest);
 			ft_freeptr(&tmp);
-			return (-1);
+			*ret = -1;
 		}
+		if (*ret < 0)
+			break;
 		ft_freeptr(&tmp);
 	}
-	if (next == NULL)
-	{
-		ft_freeptr(rest);
-		return (0);
-	}
-	return (1);
+	if (next == NULL || *ret < 0)
+		ft_freeptr(save);
+	if (*ret < 0)
+		ft_freeptr(line);
 }
 
-static t_gnl		*ft_lstnewfd(int fd)
+static t_gnl		*create_fd_list(int fd)
 {
 	t_gnl	*new;
 
-	new = malloc(sizeof(t_gnl));
+	new = malloc(sizeof(*new));
 	if (new == NULL)
 		return (NULL);
-	new->rest = NULL;
+	new->save = NULL;
 	new->fd = fd;
 	new->next = NULL;
 	return (new);
@@ -96,27 +98,26 @@ int			get_next_line(int fd, char **line)
 {
 	static t_gnl		*head;
 	t_gnl			*tmp;
-	char			*next;
-	int			ret;
+	char			*test;
+	ssize_t			ret;
 
-	next = NULL;
-	if (fd < 0 || !line || read(fd, next, 0))
+	test = NULL;
+	if (fd < 0 || !line || read(fd, test, 0))
 		return (-1);
-	(head == NULL) ? head = ft_lstnewfd(fd) : head;
-	if (head == NULL)
-		return (-1);
+	if (!head)
+		if ((head = create_fd_list(fd)) == NULL)
+			return (-1);
 	tmp = head;
 	while (tmp->fd != fd)
 	{
 		if (tmp->next == NULL)
-			tmp->next = ft_lstnewfd(fd);
+			tmp->next = create_fd_list(fd);
 		tmp = tmp->next;
 	}
 	if (tmp == NULL)
 		return (-1);
-	next = ft_checkrest(&tmp->rest, line, next);
-	ret = ft_readbuff(tmp->fd, line, &tmp->rest, next);
+	readbuff(tmp->fd, line, &tmp->save, &ret);
 	if (ret <= 0)
 		ft_lstfreenode(tmp->fd, &head);
-	return (ret);
+	return (ret > 1 ? 1 : ret);
 }

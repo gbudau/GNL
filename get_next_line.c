@@ -40,7 +40,7 @@ static char	*ft_checksave(char **save, char **line, ssize_t *error)
 	return (next);
 }
 
-char		*ft_checkbuff(char *next, char **save, char *buff, ssize_t *err)
+static char	*ft_checkbuff(char *next, char **save, char *buff, ssize_t *err)
 {
 	char	*tmp;
 
@@ -56,7 +56,7 @@ char		*ft_checkbuff(char *next, char **save, char *buff, ssize_t *err)
 	return (next);
 }
 
-int		ft_readbuff(int fd, char **line, char **save, ssize_t *err)
+static int	ft_readbuff(int fd, char **line, char **save, ssize_t *err)
 {
 	char			buff[BUFFER_SIZE + 1];
 	char			*next;
