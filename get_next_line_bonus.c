@@ -6,92 +6,87 @@
 /*   By: gbudau <gbudau@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/23 17:15:15 by gbudau            #+#    #+#             */
-/*   Updated: 2019/12/24 00:28:42 by gbudau           ###   ########.fr       */
+/*   Updated: 2020/02/28 13:56:06 by gbudau           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-static void	checksave(char **save, char **line, char **next, ssize_t *ret)
+static ssize_t	checksave(char **save, char **line, char **next)
 {
-	ssize_t	i;
-
-	i = -1;
-	*ret = 0;
-	if (*save != NULL)
+	if (*save == NULL)
 	{
-		if ((*next = ft_strchr(*save, '\n')))
-		{
-			*ret = 1;
-			*(*next)++ = '\0';
-			*line = ft_strdup(*save);
-			while ((*next)[++i])
-				(*save)[i] = (*next)[i];
-			(*save)[i] = '\0';
-		}
-		else
-			*line = ft_strdup(*save);
+		*line = gnl_strdup("");
+		*next = NULL;
+		return (*line ? 1 : -1);
 	}
-	else
-		*line = ft_strdup("");
-	if (*line == NULL)
-		*ret = -1;
-}
-
-static void	checkbuff(char **next, char **save, char *buff, ssize_t *ret)
-{
-	char	*tmp;
-
-	if ((*next = ft_strchr(buff, '\n')))
+	if ((*next = gnl_strchr(*save, '\n')))
 	{
 		*(*next)++ = '\0';
-		tmp = *save;
-		*save = ft_strdup(*next);
-		if (*save == NULL)
-			*ret = -1;
-		ft_freeptr(&tmp);
+		*line = gnl_strdup(*save);
+		gnl_strcpy(*save, *next);
 	}
+	else
+	{
+		*line = gnl_strdup(*save);
+		free(*save);
+		*save = NULL;
+	}
+	return (*line ? 1 : -1);
 }
 
-static void	readbuff(int fd, char **line, char **save, ssize_t *ret)
+static int	readbuff(int fd, char **line, char **save)
 {
 	char	buff[BUFFER_SIZE + 1];
 	char	*next;
-	char	*tmp;
+	ssize_t	error;
 
-	next = NULL;
-	checksave(save, line, &next, ret);
-	while (*ret >= 0 && !next && (*ret = read(fd, buff, BUFFER_SIZE)) > 0)
+	error = checksave(save, line, &next);
+	while (error > 0 && !next && (error = read(fd, buff, BUFFER_SIZE)) > 0)
 	{
-		buff[*ret] = '\0';
-		checkbuff(&next, save, buff, ret);
-		tmp = *line;
-		if (*ret > 0 && !(*line = ft_strjoin(*line, buff)))
+		buff[error] = '\0';
+		if ((next = gnl_strchr(buff, '\n')))
 		{
-			ft_freeptr(&tmp);
-			*ret = -1;
+			*next++ = '\0';
+			*save = gnl_strdup(next);
 		}
-		if (*ret < 0)
-			break;
-		ft_freeptr(&tmp);
+		if ((next && !*save) || !(*line = gnl_strjoinfree(*line, buff)))
+			error = -1;
 	}
-	if (next == NULL || *ret < 0)
-		ft_freeptr(save);
-	if (*ret < 0)
-		ft_freeptr(line);
+	if (!next || error < 0)
+		if (*save)
+			free(*save);
+	if (error < 0)
+		return (-1);
+	return (next ? 1 : 0);
 }
 
 static t_gnl		*create_fd_list(int fd)
 {
 	t_gnl	*new;
 
-	new = malloc(sizeof(*new));
-	if (new == NULL)
+	if ((new = malloc(sizeof(*new))) == NULL)
 		return (NULL);
 	new->save = NULL;
 	new->fd = fd;
 	new->next = NULL;
 	return (new);
+}
+
+static void		gnl_lstfreenode(int fd, t_gnl **head)
+{
+	t_gnl	*del;
+	t_gnl	**p;
+
+	p = head;
+	while (*p && (*p)->fd != fd)
+		p = &(*p)->next;
+	if (*p)
+	{
+		del = *p;
+		*p = del->next;
+		free(del);
+	}
 }
 
 int			get_next_line(int fd, char **line)
@@ -104,20 +99,18 @@ int			get_next_line(int fd, char **line)
 	test = NULL;
 	if (fd < 0 || !line || read(fd, test, 0))
 		return (-1);
-	if (!head)
-		if ((head = create_fd_list(fd)) == NULL)
-			return (-1);
+	head = !head ? create_fd_list(fd) : head;
 	tmp = head;
-	while (tmp->fd != fd)
+	while (tmp && tmp->fd != fd)
 	{
 		if (tmp->next == NULL)
 			tmp->next = create_fd_list(fd);
 		tmp = tmp->next;
 	}
-	if (tmp == NULL)
+	if (!tmp)
 		return (-1);
-	readbuff(tmp->fd, line, &tmp->save, &ret);
+	ret = readbuff(tmp->fd, line, &tmp->save);
 	if (ret <= 0)
-		ft_lstfreenode(tmp->fd, &head);
-	return (ret > 1 ? 1 : ret);
+		gnl_lstfreenode(tmp->fd, &head);
+	return (ret);
 }

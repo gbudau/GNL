@@ -6,89 +6,74 @@
 /*   By: gbudau <gbudau@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/23 17:15:07 by gbudau            #+#    #+#             */
-/*   Updated: 2019/12/23 23:58:54 by gbudau           ###   ########.fr       */
+/*   Updated: 2020/02/28 13:23:23 by gbudau           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-void	ft_freeptr(char **ptr)
+size_t	gnl_strlen(const char *s)
 {
-	if (*ptr != NULL)
-		free(*ptr);
-	*ptr = NULL;
+	const char	*e;
+
+	e = s;
+	while (*e)
+		e++;
+	return (e - s);
 }
 
-void	ft_lstfreenode(int fd, t_gnl **head)
+char	*gnl_strcpy(char *dst, const char *src)
 {
-	t_gnl	*del;
-	t_gnl	**p;
+	char	*tmp;
 
-	p = head;
-	while (*p && (*p)->fd != fd)
-		p = &(*p)->next;
-	if (*p)
-	{
-		del = *p;
-		*p = del->next;
-		free(del);
-	}
+	tmp = dst;
+	while (*src)
+		*tmp++ = *src++;
+	*tmp = '\0';
+	return (dst);
 }
 
-char	*ft_strdup(const char *s1)
+char	*gnl_strdup(const char *s1)
 {
 	char	*ret;
-	size_t	len;
 
-	len = 0;
-	while (s1[len] != 0)
-		len++;
-	if (!(ret = malloc(++len)))
+	if (!(ret = malloc(gnl_strlen(s1) + 1)))
 		return (NULL);
-	while (len--)
-		ret[len] = s1[len];
+	gnl_strcpy(ret, s1);
 	return (ret);
 }
 
-char	*ft_strchr(const char *s, int c)
+char	*gnl_strchr(const char *s, int c)
 {
-	const char		*p;
+	unsigned char	ch;
 
-	p = s;
-	if (p)
+	ch = c;
+	while (s)
 	{
-		while (*p)
-		{
-			if (*p == (const char)c)
-				return ((char *)p);
-			p++;
-		}
-		if (*p == (const char)c)
-			return ((char *)p);
+		if (*s == ch)
+			return ((char *)s);
+		if (*s == '\0')
+			return (NULL);
+		s++;
 	}
 	return (NULL);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*gnl_strjoinfree(char *s1, char const *s2)
 {
 	char	*ret;
-	size_t	i;
-	size_t	j;
+	size_t	l1;
+	size_t	l2;
 
-	if (s1 == NULL || s2 == NULL)
+	if (s1 == NULL)
 		return (NULL);
-	i = 0;
-	while (s1[i] != '\0')
-		i++;
-	j = 0;
-	while (s2[j] != '\0')
-		j++;
-	if (!(ret = malloc(i + j + 1)))
+	l1 = gnl_strlen(s1);
+	l2 = gnl_strlen(s2);
+	if (!(ret = malloc(l1 + l2 + 1)))
 		return (NULL);
-	ret[i + j] = '\0';
-	while (j-- != 0)
-		ret[i + j] = s2[j];
-	while (i-- != 0)
-		ret[i] = s1[i];
+	gnl_strcpy(ret, s1);
+	gnl_strcpy(ret + l1, s2);
+	free(s1);
+	s1 = NULL;
 	return (ret);
 }
