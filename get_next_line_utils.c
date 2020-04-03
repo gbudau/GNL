@@ -6,13 +6,13 @@
 /*   By: gbudau <gbudau@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/23 17:15:07 by gbudau            #+#    #+#             */
-/*   Updated: 2020/02/28 12:33:04 by gbudau           ###   ########.fr       */
+/*   Updated: 2020/04/01 16:19:45 by gbudau           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-size_t	gnl_strlen(const char	*s)
+size_t	gnl_strlen(const char *s)
 {
 	const char	*e;
 

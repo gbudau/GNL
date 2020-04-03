@@ -6,7 +6,7 @@
 /*   By: gbudau <gbudau@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/23 17:15:15 by gbudau            #+#    #+#             */
-/*   Updated: 2020/02/28 12:42:43 by gbudau           ###   ########.fr       */
+/*   Updated: 2020/04/03 16:17:48 by gbudau           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,12 @@ static ssize_t	checksave(char **save, char **line, char **next)
 	return (*line ? 1 : -1);
 }
 
-int		get_next_line(int fd, char **line)
+int				get_next_line(int fd, char **line)
 {
 	char			buff[BUFFER_SIZE + 1];
 	char			*next;
 	ssize_t			error;
-	static	char		*save;
+	static	char	*save;
 
 	if (fd < 0 || !line || read(fd, save, 0))
 		return (-1);

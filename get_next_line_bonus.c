@@ -6,7 +6,7 @@
 /*   By: gbudau <gbudau@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/23 17:15:15 by gbudau            #+#    #+#             */
-/*   Updated: 2020/02/28 13:56:06 by gbudau           ###   ########.fr       */
+/*   Updated: 2020/04/03 16:15:51 by gbudau           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ static ssize_t	checksave(char **save, char **line, char **next)
 	return (*line ? 1 : -1);
 }
 
-static int	readbuff(int fd, char **line, char **save)
+static int		readbuff(int fd, char **line, char **save)
 {
 	char	buff[BUFFER_SIZE + 1];
 	char	*next;
@@ -61,7 +61,7 @@ static int	readbuff(int fd, char **line, char **save)
 	return (next ? 1 : 0);
 }
 
-static t_gnl		*create_fd_list(int fd)
+static t_gnl	*create_fd_list(int fd)
 {
 	t_gnl	*new;
 
@@ -89,9 +89,9 @@ static void		gnl_lstfreenode(int fd, t_gnl **head)
 	}
 }
 
-int			get_next_line(int fd, char **line)
+int				get_next_line(int fd, char **line)
 {
-	static t_gnl		*head;
+	static t_gnl	*head;
 	t_gnl			*tmp;
 	char			*test;
 	ssize_t			ret;
